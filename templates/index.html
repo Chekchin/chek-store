@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHEK - IPA Telegram Uploader</title>
+
+    <!-- ត្រូវមានកូដនេះនៅចំទីនេះ -->
+    <link rel="icon" type="image/png" href="/cheklogo.png" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts: Khmer Battambang/Kantumruy & Inter & Fira Code -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=Kantumruy+Pro:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#ecfeff",
+                100: "#cffafe",
+                400: "#22d3ee",
+                500: "#06b6d4",
+                600: "#0891b2",
+                900: "#164e63",
+              },
+              darkbg: "#0f172a",
+              cardbg: "#1e293b",
+              terminalbg: "#020617",
+            },
+            fontFamily: {
+              sans: ["Kantumruy Pro", "Inter", "sans-serif"],
+              mono: ["Fira Code", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .glow-text {
+        text-shadow:
+          0 0 12px rgba(34, 211, 238, 0.6),
+          0 0 24px rgba(6, 182, 212, 0.4);
+      }
+      .drag-active {
+        border-color: #22d3ee !important;
+        background-color: rgba(34, 211, 238, 0.05) !important;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #020617;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-darkbg text-slate-100 font-sans min-h-screen flex flex-col selection:bg-brand-500 selection:text-white"
+  >
+    <!-- HEADER -->
+    <header
+      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-cyan-500/30"
+          >
+            CS
+          </div>
+          <div>
+            <h1
+              class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-cyan-400 via-teal-300 to-sky-400 bg-clip-text text-transparent"
+            >
+              CHEK STORE
+            </h1>
+            <p class="text-xs text-slate-400" id="header-subtitle">
+              Telegram IPA Uploader System
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div
+            class="hidden md:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700 text-xs"
+          >
+            <span class="relative flex h-2.5 w-2.5">
+              <span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+              ></span>
+              <span
+                class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"
+              ></span>
+            </span>
+            <span class="text-slate-300 font-medium" id="txt-server-status"
+              >Server Online</span
+            >
+          </div>
+
+          <div
+            class="hidden sm:flex items-center space-x-2 bg-brand-900/40 border border-brand-500/30 px-3 py-1.5 rounded-full text-xs text-brand-400 font-mono"
+          >
+            <i class="fa-solid fa-bolt text-yellow-400"></i>
+            <span>MTProto 4GB Capable</span>
+          </div>
+
+          <!-- LANGUAGE SWITCHER BUTTON -->
+          <div class="relative inline-block text-left">
+            <button
+              id="lang-btn"
+              type="button"
+              class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-colors"
+            >
+              <span id="current-lang-flag">🇰🇭</span>
+              <span id="current-lang-text">ខ្មែរ</span>
+              <i
+                class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"
+              ></i>
+            </button>
+
+            <!-- Language Dropdown Menu -->
+            <div
+              id="lang-menu"
+              class="hidden absolute right-0 mt-2 w-36 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1 z-50 text-xs"
+            >
+              <button
+                onclick="setLanguage('km')"
+                class="w-full text-left px-4 py-2 hover:bg-slate-800 flex items-center gap-2 text-slate-200"
+              >
+                <span>🇰🇭</span>
+                <span>ភាសាខ្មែរ</span>
+              </button>
+              <button
+                onclick="setLanguage('en')"
+                class="w-full text-left px-4 py-2 hover:bg-slate-800 flex items-center gap-2 text-slate-200"
+              >
+                <span>🇬🇧</span>
+                <span>English</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Logout Button -->
+          <a
+            href="/logout"
+            class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-semibold transition-colors flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span id="txt-logout">Logout</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main
+      class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8"
+    >
+      <!-- ASCII BANNER (Centered & Full with Subtitle & Telegram Support Buttons) -->
+      <div
+        class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6"
+      >
+        <div
+          class="absolute -top-32 -left-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"
+        ></div>
+        <div
+          class="absolute -bottom-32 -right-32 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"
+        ></div>
+
+        <!-- Original ASCII Block Banner -->
+        <div
+          class="w-full overflow-x-auto flex justify-center items-center py-2"
+        >
+          <pre
+            class="font-mono text-[8px] sm:text-[11px] md:text-[13px] text-cyan-400 leading-tight font-bold tracking-widest glow-text select-none text-left"
+          >
+ ██████╗██╗  ██╗███████╗██╗  ██╗    ███████╗████████╗ ██████╗ ██████╗ ███████╗
+██╔════╝██║  ██║██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔════╝
+██║     ███████║█████╗  █████╔╝     ███████╗   ██║   ██║   ██║██████╔╝█████╗  
+██║     ██║  ██║██╔══╝  ██╔  ██╗    ╚════██║   ██║   ██║   ██║██╔══██╗██╔══╝  
+╚██████╗██║  ██║███████╗██║  ██╗    ███████║   ██║   ██║████╔╝██║  ██║███████╗
+ ╚═════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝   ╚═════╝  ╚═╝  ╚═╝╚══════╝
+          </pre>
+        </div>
+
+        <!-- Subtitle & Engine Info -->
+        <div
+          class="flex flex-col items-center space-y-3 max-w-xl mx-auto pt-4 border-t border-slate-800/80 w-full"
+        >
+          <div
+            class="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/25 px-3.5 py-1 rounded-full text-xs font-semibold text-cyan-400 shadow-inner"
+          >
+            <i class="fa-solid fa-bolt text-cyan-400 animate-pulse"></i>
+            <span>IPA Telethon Engine v2.4</span>
+          </div>
+          <p
+            class="text-xs sm:text-sm text-slate-400 leading-relaxed"
+            id="hero-desc"
+          >
+            Directly stream large iOS binaries into your Telegram Channel with
+            custom metadata, caption notes, and live telemetry.
+          </p>
+
+          <!-- TELEGRAM SUPPORT & CHANNEL LINKS -->
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-3">
+            <!-- Join Channel Button -->
+            <a
+              href="https://t.me/channelchinchek12"
+              target="_blank"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-semibold transition-colors"
+            >
+              <i class="fa-brands fa-telegram text-base"></i>
+              <span id="btn-join-channel">Join Telegram Channel</span>
+            </a>
+            <!-- Chat with Admin Button -->
+            <a
+              href="https://t.me/chinchek55"
+              target="_blank"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-semibold transition-colors"
+            >
+              <i class="fa-solid fa-comments text-base"></i>
+              <span id="btn-chat-admin">Chat with Admin </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORM & PROGRESS SECTION -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- FORM -->
+        <div class="lg:col-span-7 space-y-6">
+          <form
+            id="upload-form"
+            class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6"
+          >
+            <h2
+              class="text-lg font-bold text-slate-200 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-cloud-arrow-up text-cyan-400"></i>
+              <span id="form-title">File Selection & Metadata</span>
+            </h2>
+
+            <!-- IPA FILE INPUT -->
+            <div>
+              <label
+                class="block text-xs font-medium text-slate-400 mb-2"
+                id="lbl-ipa-file"
+                >TARGET .IPA FILE (MAX 4GB)</label
+              >
+              <label
+                for="ipa-file-input"
+                id="drop-zone"
+                class="border-2 border-dashed border-slate-700 hover:border-cyan-500/60 bg-slate-950/50 rounded-xl p-6 text-center transition-all cursor-pointer group relative block"
+              >
+                <input
+                  type="file"
+                  id="ipa-file-input"
+                  name="ipa_file"
+                  accept=".ipa"
+                  class="hidden"
+                />
+                <div class="space-y-3" id="drop-zone-idle">
+                  <div
+                    class="w-14 h-14 mx-auto rounded-full bg-slate-800 group-hover:bg-cyan-500/10 flex items-center justify-center text-slate-400 group-hover:text-cyan-400 transition-colors"
+                  >
+                    <i class="fa-solid fa-file-zipper text-2xl"></i>
+                  </div>
+                  <div>
+                    <p
+                      class="text-sm font-semibold text-slate-200"
+                      id="txt-drop-title"
+                    >
+                      Click to browse or drag & drop .IPA file here
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1" id="txt-drop-sub">
+                      Supports large iOS app files up to 4GB
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  id="file-info"
+                  class="hidden flex items-center justify-between bg-slate-800/80 p-4 rounded-lg border border-slate-700"
+                >
+                  <div
+                    class="flex items-center space-x-3 overflow-hidden text-left"
+                  >
+                    <div
+                      class="w-10 h-10 rounded bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0"
+                    >
+                      <i class="fa-solid fa-box-archive text-lg"></i>
+                    </div>
+                    <div class="truncate">
+                      <p
+                        id="file-name"
+                        class="text-sm font-semibold text-slate-200 truncate"
+                      >
+                        app.ipa
+                      </p>
+                      <p id="file-size" class="text-xs text-slate-400">0 MB</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    id="remove-file-btn"
+                    class="text-slate-400 hover:text-rose-400 p-2 text-sm transition-colors"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </label>
+            </div>
+
+            <!-- THUMBNAIL INPUT -->
+            <div>
+              <label
+                class="block text-xs font-medium text-slate-400 mb-2"
+                id="lbl-thumb-file"
+                >CUSTOM THUMBNAIL (OPTIONAL .PNG / .JPG)</label
+              >
+              <div class="flex items-center gap-3">
+                <input
+                  type="file"
+                  id="thumb-file-input"
+                  name="thumb_file"
+                  accept="image/*"
+                  class="hidden"
+                />
+                <button
+                  type="button"
+                  id="browse-thumb-btn"
+                  class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium px-4 py-2.5 rounded-lg border border-slate-700 transition-colors flex items-center gap-2"
+                >
+                  <i class="fa-solid fa-image text-cyan-400"></i>
+                  <span id="btn-choose-img">Choose Image</span>
+                </button>
+                <span
+                  id="thumb-name"
+                  class="text-xs text-slate-400 truncate flex-1"
+                  >No image selected</span
+                >
+              </div>
+            </div>
+
+            <!-- CUSTOM FILENAME & CHAT ID -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="custom-filename"
+                  class="block text-xs font-medium text-slate-400 mb-2"
+                  id="lbl-custom-name"
+                  >CUSTOM FILENAME IN TELEGRAM</label
+                >
+                <input
+                  type="text"
+                  id="custom-filename"
+                  name="custom_name"
+                  placeholder="e.g. ESign_v5.0.2.ipa"
+                  class="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-lg px-3.5 py-2.5 text-sm text-slate-200 outline-none transition-colors font-mono"
+                />
+              </div>
+
+              <div>
+                <label
+                  for="chat-id"
+                  class="block text-xs font-medium text-slate-400 mb-2"
+                  id="lbl-chat-id"
+                  >TARGET CHANNEL CHAT ID</label
+                >
+                <input
+                  type="text"
+                  id="chat-id"
+                  name="chat_id"
+                  value="-1002304422673"
+                  class="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-lg px-3.5 py-2.5 text-sm text-cyan-300 outline-none transition-colors font-mono"
+                />
+              </div>
+            </div>
+
+            <!-- FILE DESCRIPTION / CAPTION -->
+            <div>
+              <label
+                for="file-caption"
+                class="block text-xs font-medium text-slate-400 mb-2"
+                id="lbl-caption"
+                >FILE DESCRIPTION / CAPTION (OPTIONAL)</label
+              >
+              <textarea
+                id="file-caption"
+                name="caption"
+                rows="3"
+                placeholder="Write description or release notes here..."
+                class="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-lg px-3.5 py-2.5 text-sm text-slate-200 outline-none transition-colors font-sans resize-none"
+              ></textarea>
+            </div>
+
+            <!-- UPLOAD BUTTON -->
+            <button
+              type="submit"
+              id="start-upload-btn"
+              class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 text-base"
+            >
+              <i class="fa-solid fa-paper-plane"></i>
+              <span id="btn-start-upload">Start Telegram Upload</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- TELEMETRY / PROGRESS -->
+        <div class="lg:col-span-5 space-y-6">
+          <div
+            class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6"
+          >
+            <h2
+              class="text-lg font-bold text-slate-200 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-chart-line text-cyan-400"></i>
+              <span id="telemetry-title">Upload Telemetry</span>
+            </h2>
+
+            <div
+              class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4"
+            >
+              <div class="flex justify-between items-center text-sm">
+                <span id="status-label" class="text-slate-400 font-medium"
+                  >Status: Waiting</span
+                >
+                <span
+                  id="progress-percent"
+                  class="font-mono text-cyan-400 font-bold"
+                  >0.00%</span
+                >
+              </div>
+
+              <div
+                class="w-full bg-slate-800 h-3 rounded-full overflow-hidden p-0.5"
+              >
+                <div
+                  id="progress-bar-fill"
+                  class="bg-gradient-to-r from-cyan-500 to-teal-400 h-full rounded-full w-0 transition-all duration-300"
+                ></div>
+              </div>
+
+              <div
+                class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-slate-900"
+              >
+                <div>
+                  <span class="text-slate-500 block" id="lbl-transferred"
+                    >TRANSFERRED</span
+                  >
+                  <span id="transferred-mb" class="text-slate-300 font-medium"
+                    >0.00 / 0.00 MB</span
+                  >
+                </div>
+                <div class="text-right">
+                  <span class="text-slate-500 block" id="lbl-speed">SPEED</span>
+                  <span id="upload-speed" class="text-slate-300 font-medium"
+                    >0 MB/s</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs text-slate-400">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span id="chk-1">Custom Description/Caption Supported</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span id="chk-2">Bot Token / Session Auto Handler</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span id="chk-3">Target: Channel ID -1002304422673</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERMINAL LOGS -->
+      <div
+        class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+      >
+        <div
+          class="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+            <span
+              class="w-3 h-3 rounded-full bg-emerald-500 inline-block"
+            ></span>
+            <span
+              class="text-xs font-mono text-slate-400 ml-2"
+              id="txt-log-title"
+              >chekup.py - Live Execution Logs</span
+            >
+          </div>
+          <button
+            id="clear-log-btn"
+            class="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+          >
+            <i class="fa-solid fa-trash-can mr-1"></i>
+            <span id="btn-clear-log">Clear</span>
+          </button>
+        </div>
+        <div
+          id="terminal-body"
+          class="p-4 bg-terminalbg font-mono text-xs sm:text-sm text-slate-300 h-56 overflow-y-auto space-y-1"
+        >
+          <p class="text-slate-500" id="log-init">
+            [SYSTEM]: CHEK STORE Telegram Web Engine Initialized.
+          </p>
+          <p class="text-slate-500" id="log-ready">
+            [SYSTEM]: Ready for IPA file stream request...
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="border-t border-slate-800 bg-slate-900 py-4 text-center text-xs text-slate-500"
+    >
+      <p id="txt-footer">
+        © 2026 CHEK STORE - Custom Telethon IPA Engine. Built with HTML,
+        Tailwind & Python.
+      </p>
+    </footer>
+
+    <!-- SCRIPT FOR UPLOAD & MULTI-LANGUAGE SWITCHER -->
+    <script>
+      // LANGUAGE DICTIONARY
+      const translations = {
+        en: {
+          flag: "🇬🇧",
+          name: "English",
+          subtitle: "Telegram IPA Uploader System",
+          serverStatus: "Server Online",
+          logout: "Logout",
+          heroDesc:
+            "Directly stream large iOS binaries into your Telegram Channel with custom metadata, caption notes, and live telemetry.",
+          btnJoinChannel: "Join Telegram Channel",
+          btnChatAdmin: "Chat with Admin (@chinchek)",
+          formTitle: "File Selection & Metadata",
+          lblIpaFile: "TARGET .IPA FILE (MAX 4GB)",
+          txtDropTitle: "Click to browse or drag & drop .IPA file here",
+          txtDropSub: "Supports large iOS app files up to 4GB",
+          lblThumbFile: "CUSTOM THUMBNAIL (OPTIONAL .PNG / .JPG)",
+          btnChooseImg: "Choose Image",
+          noImg: "No image selected",
+          lblCustomName: "CUSTOM FILENAME IN TELEGRAM",
+          lblChatId: "TARGET CHANNEL CHAT ID",
+          lblCaption: "FILE DESCRIPTION / CAPTION (OPTIONAL)",
+          captionPlaceholder: "Write description or release notes here...",
+          btnStartUpload: "Start Telegram Upload",
+          telemetryTitle: "Upload Telemetry",
+          statusWaiting: "Status: Waiting",
+          lblTransferred: "TRANSFERRED",
+          lblSpeed: "SPEED",
+          chk1: "Custom Description/Caption Supported",
+          chk2: "Bot Token / Session Auto Handler",
+          chk3: "Target: Channel ID -1002304422673",
+          logTitle: "chekup.py - Live Execution Logs",
+          btnClearLog: "Clear",
+          logInit: "[SYSTEM]: CHEK STORE Telegram Web Engine Initialized.",
+          logReady: "[SYSTEM]: Ready for IPA file stream request...",
+          txtFooter:
+            "© 2026 CHEK STORE - Custom Telethon IPA Engine. Built with HTML, Tailwind & Python.",
+        },
+        km: {
+          flag: "🇰🇭",
+          name: "ខ្មែរ",
+          subtitle: "ប្រព័ន្ធអាប់ឡូតហ្វាល IPA ទៅកាន់ Telegram",
+          serverStatus: "ម៉ាស៊ីនសឺវើដើរធម្មតា",
+          logout: "ចាកចេញ",
+          heroDesc:
+            "បញ្ជូនហ្វាលកម្មវិធី iOS ទំហំធំដោយផ្ទាល់ទៅកាន់ Telegram Channel របស់អ្នក ជាមួយនឹងព័ត៌មានលម្អិត កំណត់ចំណាំ និងការតាមដានទិន្នន័យផ្សាយបន្តផ្ទាល់។",
+          btnJoinChannel: "ចូលរួម Telegram Channel",
+          btnChatAdmin: "ឆាតទៅកាន់ Admin ",
+          formTitle: "ការជ្រើសរើសហ្វាល និងព័ត៌មានបន្ថែម",
+          lblIpaFile: "ជ្រើសរើសហ្វាល .IPA (អតិបរមា 4GB)",
+          txtDropTitle: "ចុចទីនេះដើម្បីជ្រើសរើស ឬទាញទម្លាក់ហ្វាល .IPA",
+          txtDropSub: "គាំទ្រហ្វាលកម្មវិធី iOS ទំហំធំរហូតដល់ 4GB",
+          lblThumbFile: "រូបភាពតំណាង (រូបភាពជម្រើស .PNG / .JPG)",
+          btnChooseImg: "ជ្រើសរើសរូបភាព",
+          noImg: "មិនទាន់ជ្រើសរើសរូបភាព",
+          lblCustomName: "ឈ្មោះហ្វាលក្នុង Telegram",
+          lblChatId: "លេខ CHAT ID របស់ CHANNEL",
+          lblCaption: "ការពិពណ៌នា ឬកំណត់ចំណាំ (ជម្រើស)",
+          captionPlaceholder: "សរសេរការពិពណ៌នា ឬព័ត៌មានកម្មវិធីនៅទីនេះ...",
+          btnStartUpload: "ចាប់ផ្តើមអាប់ឡូតទៅ Telegram",
+          telemetryTitle: "ស្ថានភាពនៃការអាប់ឡូត",
+          statusWaiting: "ស្ថានភាព៖ រង់ចាំ",
+          lblTransferred: "ទំហំបានបញ្ជូន",
+          lblSpeed: "ល្បឿន",
+          chk1: "គាំទ្រការសរសេរការពិពណ៌នាបន្ថែម",
+          chk2: "ប្រព័ន្ធគ្រប់គ្រង Bot Token និង Session អូតូ",
+          chk3: "គោលដៅ៖ Channel ID -1002304422673",
+          logTitle: "chekup.py - កំណត់ត្រាប្រតិបត្តិការ",
+          btnClearLog: "លុបចោល",
+          logInit:
+            "[ប្រព័ន្ធ]: ដំណើរការ CHEK STORE Telegram Web Engine រួចរាល់។",
+          logReady: "[ប្រព័ន្ធ]: ត្រៀមខ្លួនទទួលសំណើអាប់ឡូតហ្វាល IPA...",
+          txtFooter:
+            "© 2026 CHEK STORE - កូដបង្កើតដោយ HTML, Tailwind & Python.",
+        },
+      };
+
+      const langBtn = document.getElementById("lang-btn");
+      const langMenu = document.getElementById("lang-menu");
+      const currentLangFlag = document.getElementById("current-lang-flag");
+      const currentLangText = document.getElementById("current-lang-text");
+
+      // Toggle Lang Menu
+      langBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        langMenu.classList.toggle("hidden");
+      });
+
+      document.addEventListener("click", () => {
+        langMenu.classList.add("hidden");
+      });
+
+      function setLanguage(lang) {
+        const t = translations[lang];
+        if (!t) return;
+
+        currentLangFlag.textContent = t.flag;
+        currentLangText.textContent = t.name;
+
+        document.getElementById("header-subtitle").textContent = t.subtitle;
+        document.getElementById("txt-server-status").textContent =
+          t.serverStatus;
+        document.getElementById("txt-logout").textContent = t.logout;
+        document.getElementById("hero-desc").textContent = t.heroDesc;
+        document.getElementById("btn-join-channel").textContent =
+          t.btnJoinChannel;
+        document.getElementById("btn-chat-admin").textContent = t.btnChatAdmin;
+        document.getElementById("form-title").textContent = t.formTitle;
+        document.getElementById("lbl-ipa-file").textContent = t.lblIpaFile;
+        document.getElementById("txt-drop-title").textContent = t.txtDropTitle;
+        document.getElementById("txt-drop-sub").textContent = t.txtDropSub;
+        document.getElementById("lbl-thumb-file").textContent = t.lblThumbFile;
+        document.getElementById("btn-choose-img").textContent = t.btnChooseImg;
+        document.getElementById("lbl-custom-name").textContent =
+          t.lblCustomName;
+        document.getElementById("lbl-chat-id").textContent = t.lblChatId;
+        document.getElementById("lbl-caption").textContent = t.lblCaption;
+        document.getElementById("file-caption").placeholder =
+          t.captionPlaceholder;
+        document.getElementById("btn-start-upload").textContent =
+          t.btnStartUpload;
+        document.getElementById("telemetry-title").textContent =
+          t.telemetryTitle;
+        document.getElementById("lbl-transferred").textContent =
+          t.lblTransferred;
+        document.getElementById("lbl-speed").textContent = t.lblSpeed;
+        document.getElementById("chk-1").textContent = t.chk1;
+        document.getElementById("chk-2").textContent = t.chk2;
+        document.getElementById("chk-3").textContent = t.chk3;
+        document.getElementById("txt-log-title").textContent = t.logTitle;
+        document.getElementById("btn-clear-log").textContent = t.btnClearLog;
+        document.getElementById("log-init").textContent = t.logInit;
+        document.getElementById("log-ready").textContent = t.logReady;
+        document.getElementById("txt-footer").textContent = t.txtFooter;
+
+        langMenu.classList.add("hidden");
+      }
+
+      // Default Language (Khmer)
+      setLanguage("km");
+
+      // FILE UPLOAD SCRIPT
+      const dropZone = document.getElementById("drop-zone");
+      const ipaFileInput = document.getElementById("ipa-file-input");
+      const dropZoneIdle = document.getElementById("drop-zone-idle");
+      const fileInfo = document.getElementById("file-info");
+      const fileNameDisplay = document.getElementById("file-name");
+      const fileSizeDisplay = document.getElementById("file-size");
+      const removeFileBtn = document.getElementById("remove-file-btn");
+
+      const thumbFileInput = document.getElementById("thumb-file-input");
+      const browseThumbBtn = document.getElementById("browse-thumb-btn");
+      const thumbNameDisplay = document.getElementById("thumb-name");
+
+      const customFilenameInput = document.getElementById("custom-filename");
+      const chatIdInput = document.getElementById("chat-id");
+      const fileCaptionInput = document.getElementById("file-caption");
+      const startUploadBtn = document.getElementById("start-upload-btn");
+      const uploadForm = document.getElementById("upload-form");
+
+      const progressBarFill = document.getElementById("progress-bar-fill");
+      const progressPercent = document.getElementById("progress-percent");
+      const statusLabel = document.getElementById("status-label");
+      const transferredMb = document.getElementById("transferred-mb");
+      const uploadSpeed = document.getElementById("upload-speed");
+      const terminalBody = document.getElementById("terminal-body");
+      const clearLogBtn = document.getElementById("clear-log-btn");
+
+      let selectedFile = null;
+      let isUploading = false;
+
+      function appendLog(msg, type = "info") {
+        const p = document.createElement("p");
+        const time = new Date().toLocaleTimeString();
+        if (type === "error") {
+          p.className = "text-rose-400";
+          p.textContent = `[${time}] [!] ${msg}`;
+        } else if (type === "success") {
+          p.className = "text-emerald-400 font-semibold";
+          p.textContent = `[${time}] [✔] ${msg}`;
+        } else if (type === "warn") {
+          p.className = "text-amber-300";
+          p.textContent = `[${time}] [*] ${msg}`;
+        } else {
+          p.className = "text-cyan-300";
+          p.textContent = `[${time}] [+] ${msg}`;
+        }
+        terminalBody.appendChild(p);
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+      }
+
+      clearLogBtn.addEventListener("click", () => {
+        terminalBody.innerHTML =
+          '<p class="text-slate-500">[SYSTEM]: Terminal logs cleared.</p>';
+      });
+
+      ipaFileInput.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+      });
+
+      // Drag and Drop Handlers
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(
+          eventName,
+          (e) => {
+            e.preventDefault();
+            dropZone.classList.add("drag-active");
+          },
+          false,
+        );
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(
+          eventName,
+          (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("drag-active");
+          },
+          false,
+        );
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          ipaFileInput.files = files;
+          handleFileSelect(files[0]);
+        }
+      });
+
+      function handleFileSelect(file) {
+        if (!file.name.toLowerCase().endsWith(".ipa")) {
+          appendLog("Selected file is not an .IPA binary!", "error");
+          alert("Please select a valid .IPA file!");
+          return;
+        }
+        selectedFile = file;
+        fileNameDisplay.textContent = file.name;
+        const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+        fileSizeDisplay.textContent = `${sizeInMB} MB`;
+
+        dropZoneIdle.classList.add("hidden");
+        fileInfo.classList.remove("hidden");
+
+        if (!customFilenameInput.value) customFilenameInput.value = file.name;
+        appendLog(`File selected: ${file.name} (${sizeInMB} MB)`, "info");
+      }
+
+      removeFileBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectedFile = null;
+        ipaFileInput.value = "";
+        dropZoneIdle.classList.remove("hidden");
+        fileInfo.classList.add("hidden");
+        appendLog("File removed from selection.", "warn");
+      });
+
+      browseThumbBtn.addEventListener("click", () => thumbFileInput.click());
+      thumbFileInput.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          thumbNameDisplay.textContent = e.target.files[0].name;
+          appendLog(`Thumbnail selected: ${e.target.files[0].name}`, "info");
+        }
+      });
+
+      // REAL XMLHttpRequest UPLOAD TO PYTHON FLASK
+      uploadForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (isUploading) return;
+        if (!selectedFile) {
+          appendLog("Error: No .IPA file selected for upload!", "error");
+          alert("Please select an .IPA file first!");
+          return;
+        }
+
+        const chatId = chatIdInput.value.trim() || "-1002304422673";
+        const customName =
+          customFilenameInput.value.trim() || selectedFile.name;
+        const captionText = fileCaptionInput.value.trim();
+
+        isUploading = true;
+        startUploadBtn.disabled = true;
+        startUploadBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+        appendLog(`Initiating Telethon MTProto upload stream...`, "warn");
+        appendLog(`Target Channel Chat ID: ${chatId}`, "info");
+        appendLog(`Custom File Title: ${customName}`, "info");
+        if (captionText) {
+          appendLog(`Caption attached successfully.`, "info");
+        }
+
+        statusLabel.textContent = "Status: Stream Uploading...";
+
+        const formData = new FormData(uploadForm);
+        const xhr = new XMLHttpRequest();
+        let startTime = Date.now();
+
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const percent = ((event.loaded / event.total) * 100).toFixed(2);
+            const loadedMB = (event.loaded / (1024 * 1024)).toFixed(2);
+            const totalMB = (event.total / (1024 * 1024)).toFixed(2);
+
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            const speed =
+              elapsedTime > 0
+                ? (event.loaded / (1024 * 1024) / elapsedTime).toFixed(1)
+                : "0";
+
+            progressBarFill.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            transferredMb.textContent = `${loadedMB} / ${totalMB} MB`;
+            uploadSpeed.textContent = `${speed} MB/s`;
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status === 200) {
+            progressBarFill.style.width = "100%";
+            progressPercent.textContent = "100.00%";
+            uploadSpeed.textContent = "0 MB/s";
+            statusLabel.innerHTML =
+              'Status: Done <i class="fa-solid fa-check text-emerald-400 ml-1"></i>';
+            appendLog(
+              `Upload finished successfully to Telegram Channel ${chatId}!`,
+              "success",
+            );
+          } else {
+            statusLabel.textContent = "Status: Error";
+            appendLog(`Upload Failed! Server returned error.`, "error");
+          }
+          isUploading = false;
+          startUploadBtn.disabled = false;
+          startUploadBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        });
+
+        xhr.addEventListener("error", () => {
+          statusLabel.textContent = "Status: Error";
+          appendLog(`Connection to Server Failed!`, "error");
+          isUploading = false;
+          startUploadBtn.disabled = false;
+          startUploadBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        });
+
+        xhr.open("POST", "/upload");
+        xhr.send(formData);
+      });
+    </script>
+  </body>
+</html>
